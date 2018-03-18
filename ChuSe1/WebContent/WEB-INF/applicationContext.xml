@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:mvc="http://www.springframework.org/schema/mvc"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:aop="http://www.springframework.org/schema/aop"
+	xmlns:tx="http://www.springframework.org/schema/tx"
+		xsi:schemaLocation=
+	    "http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/context
+        http://www.springframework.org/schema/context/spring-context-4.3.xsd
+        http://www.springframework.org/schema/mvc
+        http://www.springframework.org/schema/mvc/spring-mvc-4.3.xsd
+        http://www.springframework.org/schema/aop
+        http://www.springframework.org/schema/aop/spring-aop-4.3.xsd
+        http://www.springframework.org/schema/tx
+        http://www.springframework.org/schema/tx/spring-tx-4.3.xsd">
+	
+
+	
+
+	
+	<!-- 注解扫描配置 -->
+	<context:component-scan base-package="com"/>
+	
+	<bean class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+		<property name="prefix" value="/"></property>
+		<property name="suffix" value=".jsp"></property>
+	</bean>
+	
+	<context:property-placeholder location="classpath:jdbc.properties"/>
+    <!--获取数据源 -->
+    <bean id="dataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource" >
+     <property name="driverClass" value="${jdbc.driver}"/>
+     <property name="jdbcUrl" value="${jdbc.url}"/>
+     <property name="user" value="${jdbc.user}"/>
+     <property name="password" value="${jdbc.password}"/>
+    </bean>
+    
+   <!-- 配置Hibernate的一些相关信息 -->
+   <bean id="sessionFactory"
+		class="org.springframework.orm.hibernate5.LocalSessionFactoryBean">
+		<property name="dataSource" ref="dataSource"></property>
+		<property name="packagesToScan" value="com.entity"></property>
+		<property name="hibernateProperties">
+			<props>
+				<prop key="hibernate.dialect">org.hibernate.dialect.MySQLDialect</prop>
+				<prop key="hibernate.show_sql">true</prop>
+				<prop key="hibernate.format_sql">false</prop>
+				<prop key="hibernate.userUnicode">true</prop>
+				<prop key="hibernate.characterEncoding">true</prop>
+				<prop key="current_session_context_class">thread</prop>
+			</props>
+		</property>
+	</bean>
+   	<!-- 事务管理: -->
+	<!-- 事务管理器 -->
+	<bean id="txManager"
+		class="org.springframework.orm.hibernate5.HibernateTransactionManager">
+		<property name="sessionFactory" ref="sessionFactory" />
+	</bean>
+	
+	<!-- 开启注解事务/事务Advice-->
+      <tx:annotation-driven transaction-manager="txManager" />
+
+	<bean id="multipartResolver"
+		class="org.springframework.web.multipart.commons.CommonsMultipartResolver">
+		<!-- one of the properties available; the maximum file size in bytes -->
+		<property name="maxUploadSize" value="1000000" />
+
+	</bean>
+      	<bean id="interceptor" class="com.interceptor.MyInterceptor" />
+      	
+    <mvc:interceptors>
+		<mvc:interceptor>
+			<mvc:mapping path="/register.action" />
+			<ref bean="interceptor" />
+		</mvc:interceptor>
+	</mvc:interceptors>
+      
+      <bean id="interceptor2" class="com.interceptor.UserInterceptor" />
+	<mvc:interceptors>
+		<mvc:interceptor>
+			<mvc:mapping path="/user/getUser.action" />
+			<mvc:mapping path="/food/addMyCart.action" />
+			<mvc:mapping path="/order/getOrders.action" />
+			<mvc:mapping path="/user/getAddresses.action" />
+			<mvc:mapping path="/food/showMyCart.action" />	
+			<ref bean="interceptor2" />
+		</mvc:interceptor>
+	</mvc:interceptors>
+	
+	<bean id="interceptor2" class="com.interceptor.UserInterceptor" />
+	<mvc:interceptors>
+		<mvc:interceptor>
+			<mvc:mapping path="/user/getUser.action" />
+			<mvc:mapping path="/food/addMyCart.action" />
+			<mvc:mapping path="/order/getOrders.action" />
+			<mvc:mapping path="/user/getAddresses.action" />
+			<mvc:mapping path="/food/showMyCart.action" />	
+			<ref bean="interceptor2" />
+		</mvc:interceptor>
+	</mvc:interceptors>
+	
+	<bean id="interceptor3" class="com.interceptor.AdminInterceptor" />
+	<mvc:interceptors>
+		<mvc:interceptor>
+			<mvc:mapping path="/order/showOrders.action" />
+			<mvc:mapping path="/food/getFoods.action" />
+			<mvc:mapping path="/user/showUser.action" />
+			<ref bean="interceptor3" />
+		</mvc:interceptor>
+	</mvc:interceptors>
+	<context:component-scan base-package="com" />
+       
+     
+	<!-- Service的配置============================ -->
+
+	
+	<!-- Dao的配置 ============================-->
+ 
+</beans>
+
+
+
+
+
+	
